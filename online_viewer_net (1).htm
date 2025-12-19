@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recheio Cash & Carry - Encomendas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Recheio / Jerónimo Martins Color Palette */
+            --recheio-blue: #005696;
+            --recheio-dark-blue: #003366;
+            --recheio-yellow: #FFCC00;
+            --bg-gray: #f4f4f4;
+            --text-dark: #333333;
+            --white: #ffffff;
+            --success: #28a745;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            background-color: var(--recheio-blue);
+            color: var(--white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .logo-area { display: flex; flex-direction: column; cursor: pointer; }
+        .logo-main { font-size: 1.8rem; font-weight: 900; letter-spacing: -1px; text-transform: uppercase; }
+        .logo-sub { font-size: 0.8rem; color: var(--recheio-yellow); font-weight: 700; text-transform: uppercase; }
+
+        .cart-widget {
+            position: relative;
+            cursor: pointer;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: 0.3s;
+        }
+        .cart-widget:hover { background: rgba(255,255,255,0.2); }
+        .badge {
+            position: absolute; top: -5px; right: -5px;
+            background-color: var(--recheio-yellow); color: var(--recheio-dark-blue);
+            font-size: 0.75rem; font-weight: bold; width: 20px; height: 20px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* TABS */
+        .nav-tabs {
+            background-color: white;
+            padding: 0 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 20px;
+        }
+        .nav-tab {
+            padding: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: 0.3s;
+        }
+        .nav-tab:hover { color: var(--recheio-blue); }
+        .nav-tab.active {
+            color: var(--recheio-blue);
+            border-bottom: 3px solid var(--recheio-blue);
+        }
+
+        /* MAIN LAYOUT */
+        main { flex: 1; padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        h2 {
+            color: var(--recheio-blue);
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--recheio-yellow);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        /* GRID & CARDS */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-top: 4px solid var(--recheio-blue); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card-img-placeholder { height: 150px; background-color: #eee; display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 3rem; }
+        .card-body { padding: 1.5rem; }
+        .card-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem; text-align: center; }
+
+        /* BUTTONS */
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.9rem; }
+        .btn-primary { background-color: var(--recheio-blue); color: white; }
+        .btn-primary:hover { background-color: var(--recheio-dark-blue); }
+        .btn-secondary { background-color: #e0e0e0; color: #333; }
+        .btn-secondary:hover { background-color: #d0d0d0; }
+        .btn-action { background-color: var(--recheio-yellow); color: var(--recheio-dark-blue); }
+        .btn-small { padding: 5px 10px; font-size: 0.8rem; }
+        .btn-toolbar { display: flex; gap: 10px; }
+
+        /* FORMS & TEXTAREA */
+        .form-group { margin-bottom: 1rem; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; }
+        textarea.form-control { resize: vertical; min-height: 150px; }
+
+        /* TABLES */
+        .table-container { background: white; border-radius: 8px; overflow: hidden; margin-top: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background-color: var(--recheio-dark-blue); color: white; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+        
+        /* INVOICE STYLES */
+        .invoice-box {
+            background: white; padding: 40px; border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 800px; margin: auto;
+            position: relative; page-break-after: always;
+        }
+        .invoice-box:last-child { page-break-after: auto; }
+        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+
+        /* UTILS */
+        .hidden { display: none !important; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-completed { background-color: #d4edda; color: #155724; }
+        input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
+
+        /* PRINT */
+        #print-staging-area { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #print-staging-area, #print-staging-area * { visibility: visible; }
+            #print-staging-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print, header, footer, .nav-tabs, #view-categories, #view-products, #view-checkout, #view-admin-dashboard { display: none !important; }
+            .invoice-box { border: none; box-shadow: none; width: 100%; margin: 0; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area" onclick="app.goHome()">
+            <span class="logo-main">Recheio</span>
+            <span class="logo-sub">Cash & Carry</span>
+        </div>
+        <div class="cart-widget no-print" onclick="app.goToCheckout()">
+            <i class="fas fa-shopping-cart"></i> Carrinho
+            <span class="badge" id="cart-count">0</span>
+        </div>
+    </header>
+
+    <nav class="nav-tabs no-print">
+        <div class="nav-tab active" id="tab-store" onclick="app.switchTab('store')"><i class="fas fa-store"></i> Loja Online</div>
+        <div class="nav-tab" id="tab-admin" onclick="app.switchTab('admin')"><i class="fas fa-chart-line"></i> Área de Gestão</div>
+    </nav>
+
+    <main id="app-container">
+        
+        <!-- === STORE VIEWS === -->
+        
+        <!-- 1. Categories -->
+        <section id="view-categories" class="store-view">
+            <h2>Selecionar Departamento</h2>
+            <div class="grid" id="category-grid"></div>
+        </section>
+
+        <!-- 2. Free Text Order -->
+        <section id="view-text-order" class="hidden store-view">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 id="current-cat-title">Departamento</h2>
+                <button class="btn btn-secondary" onclick="app.goHome()"><i class="fas fa-arrow-left"></i> Voltar</button>
+            </div>
+            
+            <div class="card" style="border-top: 4px solid var(--recheio-yellow);">
+                <div class="card-body">
+                    <p style="margin-bottom: 10px; color: #666;">
+                        Escreva abaixo os artigos e quantidades que pretende encomendar desta secção.
+                    </p>
+                    <div class="form-group">
+                        <textarea id="order-text-input" class="form-control" placeholder="Ex: 5kg Vazia de Novilho, 2 Peças Lombo de Porco..."></textarea>
+                    </div>
+                    <button class="btn btn-action" onclick="app.addTextToCart()" style="width: 100%; padding: 15px;">
+                        <i class="fas fa-cart-plus"></i> Adicionar ao Pedido
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Checkout -->
+        <section id="view-checkout" class="hidden store-view">
+            <h2>Finalizar Encomenda</h2>
+            <div id="checkout-summary" style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;"></div>
+            
+            <form id="checkout-form" onsubmit="app.submitOrder(event)">
+                <div class="form-group">
+                    <label>Nome da Empresa / Cliente</label>
+                    <input type="text" id="name" class="form-control" required placeholder="Ex: Restaurante O Pescador">
+                </div>
+                <div class="form-group">
+                    <label>Email de Contacto</label>
+                    <input type="email" id="email" class="form-control" required placeholder="cliente@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Data de Levantamento</label>
+                    <input type="date" id="date" class="form-control" required>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="app.goHome()">Continuar a Pedir</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Confirmar Encomenda</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- 4. Success -->
+        <section id="view-success" class="hidden store-view" style="text-align: center; padding: 3rem;">
+            <div style="font-size: 4rem; color: var(--recheio-blue); margin-bottom: 1rem;"><i class="fas fa-check-circle"></i></div>
+            <h2>Pedido Enviado!</h2>
+            <p>O seu pedido foi registado. Irá receber a confirmação e valores finais por email.</p>
+            <button class="btn btn-action" style="margin-top: 2rem;" onclick="app.reset()">Novo Pedido</button>
+        </section>
+
+
+        <!-- === ADMIN VIEWS === -->
+
+        <!-- 5. Admin Dashboard -->
+        <section id="view-admin-dashboard" class="hidden admin-view">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Gestão de Pedidos</h2>
+                <div class="btn-toolbar">
+                    <button class="btn btn-primary btn-small" onclick="app.bulkPrint()"><i class="fas fa-print"></i> Imprimir Selecionados</button>
+                    <button class="btn btn-secondary btn-small" onclick="app.initAdmin()"><i class="fas fa-sync"></i> Atualizar</button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;"><input type="checkbox" id="check-all" onchange="app.toggleAll(this)"></th>
+                            <th>Ref</th>
+                            <th>Cliente</th>
+                            <th>Levantamento</th>
+                            <th>Estado</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-orders-table"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 6. Admin Order Detail -->
+        <section id="view-admin-order-detail" class="hidden admin-view">
+            <div class="no-print" style="margin-bottom: 20px;">
+                <button class="btn btn-secondary" onclick="app.showView('view-admin-dashboard')"><i class="fas fa-arrow-left"></i> Voltar</button>
+                <button class="btn btn-primary" style="float: right;" onclick="app.printSingleCurrent()"><i class="fas fa-print"></i> Imprimir Guia</button>
+            </div>
+            <div id="single-order-container"></div>
+        </section>
+
+    </main>
+    
+    <!-- Hidden Print Area -->
+    <div id="print-staging-area"></div>
+
+    <footer class="no-print">
+        &copy; 2025 Recheio Cash & Carry, S.A.
+    </footer>
+
+    <script>
+        const app = {
+            data: {
+                cart: [], // Stores { categoryName, text }
+                currentTab: 'store',
+                currentCategory: null,
+                categories: [
+                    { id: 'talho', name: 'Talho', icon: 'fa-drumstick-bite' },
+                    { id: 'peixaria', name: 'Peixaria', icon: 'fa-fish' },
+                    { id: 'charcutaria', name: 'Charcutaria', icon: 'fa-bacon' },
+                    { id: 'congelados', name: 'Congelados', icon: 'fa-snowflake' },
+                    { id: 'mercearia', name: 'Mercearia', icon: 'fa-shopping-basket' }
+                ],
+                // Mock Orders (Free Text Format)
+                mockOrders: [
+                    { 
+                        id: 'REC-25-1001', 
+                        client: 'Restaurante O Marisco', 
+                        email: 'geral@omarisco.pt',
+                        pickupDate: '2025-12-20', 
+                        status: 'completed', 
+                        items: [
+                            { category: 'Peixaria', text: '5kg Robalo (tamanho médio)\n3kg Salmão Inteiro' },
+                            { category: 'Congelados', text: '2 sacos Batata Pala-Pala' }
+                        ]
+                    },
+                    { 
+                        id: 'REC-25-1002', 
+                        client: 'Café Central', 
+                        email: 'cafe.central@sapo.pt',
+                        pickupDate: '2025-12-21', 
+                        status: 'pending', 
+                        items: [
+                            { category: 'Talho', text: '10kg Lombo de Porco\n5kg Carne Picada Novilho' }
+                        ]
+                    }
+                ]
+            },
+
+            init: function() {
+                this.renderCategories();
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const dateEl = document.getElementById('date');
+                if(dateEl) dateEl.min = tomorrow.toISOString().split("T")[0];
+                this.initAdmin();
+            },
+
+            switchTab: function(tabName) {
+                this.data.currentTab = tabName;
+                document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+                document.getElementById(`tab-${tabName}`).classList.add('active');
+                
+                if(tabName === 'store') this.goHome();
+                else this.showView('view-admin-dashboard');
+            },
+
+            showView: function(viewId) {
+                document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+                document.getElementById(viewId).classList.remove('hidden');
+                window.scrollTo(0,0);
+            },
+
+            goHome: function() { this.showView('view-categories'); },
+
+            // --- STORE LOGIC ---
+            renderCategories: function() {
+                const container = document.getElementById('category-grid');
+                container.innerHTML = this.data.categories.map(cat => `
+                    <div class="card" onclick="app.loadCategoryForm('${cat.name}')" style="cursor: pointer;">
+                        <div class="card-img-placeholder"><i class="fas ${cat.icon}"></i></div>
+                        <div class="card-body" style="text-align: center;">
+                            <h3 class="card-title">${cat.name}</h3>
+                            <button class="btn btn-primary" style="width: 100%">Fazer Pedido</button>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            loadCategoryForm: function(name) {
+                this.data.currentCategory = name;
+                document.getElementById('current-cat-title').innerText = name;
+                document.getElementById('order-text-input').value = ''; // Clear previous input
+                this.showView('view-text-order');
+            },
+
+            addTextToCart: function() {
+                const text = document.getElementById('order-text-input').value.trim();
+                if(!text) {
+                    alert("Por favor escreva o seu pedido.");
+                    return;
+                }
+
+                // Add to Cart
+                this.data.cart.push({
+                    category: this.data.currentCategory,
+                    text: text
+                });
+
+                this.updateCartCount();
+                this.goHome(); // Return to categories to allow picking another section
+            },
+
+            updateCartCount: function() { document.getElementById('cart-count').innerText = this.data.cart.length; },
+
+            goToCheckout: function() {
+                if(this.data.cart.length === 0) return alert("Carrinho vazio.");
+                
+                let html = `<h3 style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;">Resumo do Pedido</h3>`;
+                
+                this.data.cart.forEach((item, i) => {
+                    // Convert newlines to <br> for display
+                    const displayDesc = item.text.replace(/\n/g, '<br>');
+                    html += `
+                        <div style="background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 10px; position: relative;">
+                            <strong style="color:var(--recheio-blue)">${item.category}</strong>
+                            <i class="fas fa-trash" style="color:red; cursor:pointer; position:absolute; top:10px; right:10px;" onclick="app.removeFromCart(${i})"></i>
+                            <p style="margin-top: 5px; color: #333;">${displayDesc}</p>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div style="margin-top: 20px; text-align: right; border-top: 2px solid var(--recheio-yellow); padding-top: 10px;">
+                        <span style="font-size: 1.1rem; font-weight: bold; color: #666;">Total Estimado:</span>
+                        <span style="font-size: 1.4rem; font-weight: bold; color: var(--recheio-blue); margin-left: 10px;">Sob Consulta</span>
+                        <div style="font-size:0.8rem; color:#888;">*Valores finais atribuídos após pesagem/conferência em loja.</div>
+                    </div>
+                `;
+
+                document.getElementById('checkout-summary').innerHTML = html;
+                this.showView('view-checkout');
+            },
+
+            removeFromCart: function(i) {
+                this.data.cart.splice(i, 1);
+                this.updateCartCount();
+                if(this.data.cart.length === 0) this.goHome();
+                else this.goToCheckout();
+            },
+
+            submitOrder: function(e) {
+                e.preventDefault();
+                const newOrder = {
+                    id: 'REC-25-' + (Math.floor(Math.random() * 9000) + 1000),
+                    client: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    pickupDate: document.getElementById('date').value,
+                    status: 'pending',
+                    items: [...this.data.cart] // Copy cart
+                };
+                
+                this.data.mockOrders.unshift(newOrder);
+                this.initAdmin();
+                this.showView('view-success');
+                this.data.cart = [];
+                this.updateCartCount();
+                document.getElementById('checkout-form').reset();
+            },
+
+            reset: function() { this.goHome(); },
+
+            // --- ADMIN LOGIC ---
+            initAdmin: function() {
+                const tbody = document.getElementById('admin-orders-table');
+                const checkAll = document.getElementById('check-all');
+                if(checkAll) checkAll.checked = false;
+
+                tbody.innerHTML = this.data.mockOrders.map(order => {
+                    const badgeClass = order.status === 'completed' ? 'status-completed' : 'status-pending';
+                    const statusText = order.status === 'completed' ? 'Concluído' : 'Pendente';
+                    return `
+                        <tr>
+                            <td style="text-align: center;"><input type="checkbox" class="order-checkbox" value="${order.id}"></td>
+                            <td><strong>${order.id}</strong></td>
+                            <td>${order.client}<br><small style="color:#666">${order.email}</small></td>
+                            <td>${order.pickupDate}</td>
+                            <td><span class="status-badge ${badgeClass}">${statusText}</span></td>
+                            <td>
+                                <button class="btn btn-primary btn-small" onclick="app.viewOrderDetails('${order.id}')"><i class="fas fa-eye"></i> Ver</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            },
+
+            toggleAll: function(source) {
+                document.querySelectorAll('.order-checkbox').forEach(cb => cb.checked = source.checked);
+            },
+
+            generateInvoiceHTML: function(order) {
+                // Generate items rows based on text descriptions
+                const itemsHtml = order.items.map(item => `
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 10px; width: 30%; font-weight: bold; color: var(--recheio-blue); vertical-align: top;">
+                            ${item.category}
+                        </td>
+                        <td style="padding: 10px; white-space: pre-wrap;">${item.text}</td>
+                        <td style="padding: 10px; text-align: right; color: #999;">-</td>
+                    </tr>
+                `).join('');
+
+                return `
+                    <div class="invoice-box">
+                        <div class="invoice-header">
+                            <div>
+                                <div style="font-size: 2rem; font-weight: bold; color: var(--recheio-blue);">Nota de Encomenda</div>
+                                <div style="color: #666;">Recheio Cash & Carry</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <h3 style="margin:0;">${order.id}</h3>
+                                <div>Data: ${new Date().toLocaleDateString()}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 30px; background: #f9f9f9; padding: 20px; border-radius: 4px;">
+                            <div>
+                                <strong>Cliente:</strong><br>${order.client}<br>${order.email}
+                            </div>
+                            <div style="text-align: right;">
+                                <strong>Levantamento:</strong><br>${order.pickupDate}
+                            </div>
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: var(--recheio-blue); color: white;">
+                                    <th style="padding: 10px; text-align: left;">Secção</th>
+                                    <th style="padding: 10px; text-align: left;">Descrição do Pedido</th>
+                                    <th style="padding: 10px; text-align: right;">Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>${itemsHtml}</tbody>
+                        </table>
+
+                        <div style="margin-top: 30px; text-align: right;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--recheio-blue);">Total: Sob Consulta</div>
+                            <small>Preços definidos em loja (após pesagem/conferência)</small>
+                        </div>
+                    </div>
+                `;
+            },
+
+            viewOrderDetails: function(orderId) {
+                const order = this.data.mockOrders.find(o => o.id === orderId);
+                if(!order) return;
+                this.currentViewedOrder = order;
+                document.getElementById('single-order-container').innerHTML = this.generateInvoiceHTML(order);
+                this.showView('view-admin-order-detail');
+            },
+
+            printSingleCurrent: function() {
+                if(!this.currentViewedOrder) return;
+                document.getElementById('print-staging-area').innerHTML = this.generateInvoiceHTML(this.currentViewedOrder);
+                window.print();
+            },
+
+            bulkPrint: function() {
+                const checkboxes = document.querySelectorAll('.order-checkbox:checked');
+                if(checkboxes.length === 0) return alert("Selecione pelo menos uma encomenda.");
+                
+                const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+                const ordersToPrint = this.data.mockOrders.filter(o => selectedIds.includes(o.id));
+                
+                document.getElementById('print-staging-area').innerHTML = ordersToPrint.map(o => this.generateInvoiceHTML(o)).join('');
+                window.print();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => { app.init(); });
+    </script>
+</body>
+</html>
